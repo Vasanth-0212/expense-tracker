@@ -2,17 +2,23 @@
 import { useEffect } from "react";
 import useStore from "../lib/useStockStore";
 
+// Define a type for history entry
+interface HistoryEntry {
+    label: string;
+    amount: number;
+    category: string;
+}
+
 interface StockStore {
     budget: number;
     expenses: number;
-    history: any[];
+    history: HistoryEntry[];  // Use HistoryEntry type for the history array
     setBudget: (budget: number) => void;
     setExpenses: (expenses: number) => void;
-    setHistory: (history: any[]) => void;
+    setHistory: (history: HistoryEntry[]) => void;
 }
 
 const AddExpense = () => {
-
     const expenses = useStore((state: StockStore) => state.expenses);
     const setExpenses = useStore((state: StockStore) => state.setExpenses);
     const history = useStore((state: StockStore) => state.history);
@@ -27,7 +33,7 @@ const AddExpense = () => {
             alert("Expense should be greater than 0");
         }
         setExpenses(expenses + expense);
-        setHistory([...history, {label, amount : expense, category}]);
+        setHistory([...history, { label, amount: expense, category }]);
         (document.getElementById('expense-input') as HTMLInputElement).value = '';
         (document.getElementById('label-input') as HTMLInputElement).value = '';
         (document.getElementById('category') as HTMLSelectElement).value = '';
@@ -43,10 +49,10 @@ const AddExpense = () => {
             <form onSubmit={handleExpenseSubmit}>
                 <div className="flex flex-col space-y-4 justify-start">
                     <h1 className="text-xl font-bold">Add Expense</h1>
-                    <label htmlFor="budget" className="text-gray-600">Enter Amount </label>
-                    <input type="number" id="expense-input" placeholder="Rs.5000" className="p-2 border border-gray-300 rounded-md" required/>
+                    <label htmlFor="expense" className="text-gray-600">Enter Amount</label>
+                    <input type="number" id="expense-input" placeholder="Rs.5000" className="p-2 border border-gray-300 rounded-md" required />
                     <label htmlFor="label" className="text-gray-600">Label</label>
-                    <input type="text" id="label-input" placeholder="Ex:Car Emi" className="p-2 border border-gray-300 rounded-md" required/>
+                    <input type="text" id="label-input" placeholder="Ex: Car Emi" className="p-2 border border-gray-300 rounded-md" required />
                     <label htmlFor="category" className="text-gray-600">Select Category</label>
                     <select id="category" className="p-2 border border-gray-300 rounded-md" required>
                         <option value="" disabled selected>Select a category</option>
@@ -56,19 +62,13 @@ const AddExpense = () => {
                         <option value="transportation">Transportation</option>
                         <option value="utilities">Utilities</option>
                     </select>
-                    <button
-                        className="bg-blue-500 text-white text-lg p-2 rounded-md"
-                        // onClick={() => {
-                        //     const amount = (document.querySelector('input[type="number"]') as HTMLInputElement).value;
-                        //     setExpenses(expenses + parseFloat(amount));
-                        // }}
-                    >
+                    <button className="bg-blue-500 text-white text-lg p-2 rounded-md">
                         Add Expense
                     </button>
                 </div>
             </form>
         </div>
-    )
+    );
 }
 
 export default AddExpense;
