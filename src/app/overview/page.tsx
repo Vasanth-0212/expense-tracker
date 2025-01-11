@@ -1,113 +1,76 @@
-// "use client";
-// import { useEffect, useState } from "react";
-// import useStore from "../lib/useStockStore";
-// import { PieChart, Pie, Tooltip, Cell } from 'recharts';
+"use client";
+import { useState, useEffect, useMemo } from "react";
+import useStore from "../lib/useStockStore";
+import { PieChart, Pie, Tooltip } from 'recharts';
 
-// // Define types for history and pie chart data
-// interface HistoryEntry {
-//     label: string;
-//     amount: number;
-//     category: string | null; // category can be null
-// }
+interface HistoryEntry {
+    label: string;
+    amount: number;
+    category: string | null; 
+}
 
-// interface StoreState {
-//     budget: number;
-//     expenses: number;
-//     balance: number;
-//     history: HistoryEntry[];
-// }
-
-// const Home = () => {
-//     const budget = useStore((state: StoreState) => state.budget);
-//     const expenses = useStore((state: StoreState) => state.expenses);
-//     const balance = useStore((state: StoreState) => state.balance);
-//     const history = useStore((state: StoreState) => state.history);
-
-//     // Define a type for pie chart data
-//     interface PieChartData {
-//         category: string;
-//         amount: number;
-//     }
-
-//     const [data, setData] = useState<PieChartData[]>(history.map((item) => ({
-//         amount: item.amount,
-//         category: item.category || "Unknown", // Fallback to "Unknown" if no category
-//     })));
-
-//     const [pieChartData, setPieChartData] = useState<PieChartData[]>([]);
-
-//     useEffect(() => {
-//         const categoryData: { [key: string]: number } = {};
-
-//         data.forEach(item => {
-//             if (categoryData[item.category]) {
-//                 categoryData[item.category] += item.amount;
-//             } else {
-//                 categoryData[item.category] = item.amount;
-//             }
-//         });
-
-//         categoryData['balance'] = balance;
-
-//         const formattedData = Object.keys(categoryData)
-//             .filter(category => category !== 'null') // Exclude 'null' categories
-//             .map(category => ({
-//                 category,
-//                 amount: categoryData[category],
-//             }));
-
-//         setPieChartData(formattedData);
-//     }, [data, balance]); // Add 'balance' as a dependency to update when it changes
-
-//     useEffect(() => {
-//         console.log(pieChartData);
-//     }, [pieChartData]);
-
-//     const [activeIndex, setActiveIndex] = useState(-1);
-
-//     const data1 = [
-//         { name: 'Geeksforgeeks', students: 400 },
-//         { name: 'Technical scripter', students: 700 },
-//         { name: 'Geek-i-knack', students: 200 },
-//         { name: 'Geek-o-mania', students: 1000 },
-//     ];
-
-//     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28BFE', '#FF6384'];
-
-//     const onPieEnter = (_: any, index: number) => {
-//         setActiveIndex(index);
-//     };
-
-//     return (
-//         <div className="absolute top-[100px] left-[600px] flex flex-col space-y-12 items-center justify-center">
-//             <PieChart width={500} height={500}>
-//                 <Pie
-//                     activeIndex={activeIndex}
-//                     data={data1}
-//                     dataKey="students"
-//                     outerRadius={250}
-//                     fill="green"
-//                     onMouseEnter={onPieEnter}
-//                     style={{ cursor: 'pointer', outline: 'none' }} 
-//                 >
-//                     {data1.map((entry, index) => (
-//                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-//                     ))}
-//                 </Pie>
-//                 <Tooltip />
-//             </PieChart>
-//         </div>
-//     );
-// };
-
-// export default Home;
+interface StoreState {
+    budget: number;
+    expenses: number;
+    balance: number;
+    history: HistoryEntry[];
+}
 
 const Overview = () => {
-    return(
-        <div>
-            <h1>To be implemented</h1>
+    const history = useStore((state: StoreState) => state.history);
+    const [pieChartData, setPieChartData] = useState<any>([]);
+
+    const data = useMemo(() => {
+        return history
+            .filter((entry) => entry.category !== null)
+            .map((entry) => ({ name: entry.category, value: entry.amount }));
+    }, [history]);
+
+    useEffect(() => {
+        const categoryData: { [key: string]: number } = {};
+
+        if (data) {
+            data.forEach(item => {
+                if (item.name && categoryData[item.name]) {
+                    categoryData[item.name] += item.value;
+                } else {
+                    if (item.name) {
+                        categoryData[item.name] = item.value;
+                    }
+                }
+            });
+        }
+
+        const formattedData = Object.keys(categoryData).map(key => ({
+            name: key,
+            value: categoryData[key]
+        }));
+
+        setPieChartData((prevData : any) => {
+            if (JSON.stringify(prevData) !== JSON.stringify(formattedData)) {
+                return formattedData;
+            }
+            return prevData;
+        });
+    }, [data]);
+
+    return (
+        <div className="absolute top-[100px] left-[600px] flex flex-col space-y-12 items-center justify-center">
+            <PieChart width={400} height={400}>
+                <Pie
+                    dataKey="value"
+                    isAnimationActive={false}
+                    data={pieChartData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    label
+                />
+                <Tooltip />
+            </PieChart>
         </div>
-    )
-}
+    );
+};
 
 export default Overview;

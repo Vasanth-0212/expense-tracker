@@ -1,6 +1,8 @@
 "use client";
 import { useEffect } from "react";
 import useStore from "../lib/useStockStore";
+import { toast } from "sonner"
+
 
 // Define a type for the history entry
 interface HistoryEntry {
@@ -27,24 +29,26 @@ const AddBudget = () => {
         event.preventDefault();
         const budget = parseFloat((document.getElementById('budget-input') as HTMLInputElement).value);
         if (budget <= 0) {
-            alert("Budget should be greater than 0");
+            toast.error("Budget should be greater than 0");
+            return;
         }
         setBudget(budget);
         setHistory([...history, { label: "Income Added", category: null, amount: budget }]);
         (document.getElementById('budget-input') as HTMLInputElement).value = '';
-        alert("Budget set successfully");
+        toast.success("Budget set successfully");
     };
 
     const handleAddBudgetSubmit = (event: React.FormEvent) => {
         event.preventDefault();
         const income = parseFloat((document.getElementById('income-input') as HTMLInputElement).value);
         if (income <= 0) {
-            alert("Income should be greater than 0");
+            toast.error("Income should be greater than 0");
+            return;
         }
         setBudget(budget + income);
         setHistory([...history, { label: "Income Added", category: null, amount: income }]);
         (document.getElementById('income-input') as HTMLInputElement).value = '';
-        alert("Budget added successfully");
+        toast.success("Budget added successfully");
     };
 
     useEffect(() => {

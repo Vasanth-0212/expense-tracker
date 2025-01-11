@@ -1,6 +1,8 @@
 "use client";
 import { useEffect } from "react";
 import useStore from "../lib/useStockStore";
+import { toast } from "sonner"
+
 
 // Define a type for history entry
 interface HistoryEntry {
@@ -12,6 +14,7 @@ interface HistoryEntry {
 interface StockStore {
     budget: number;
     expenses: number;
+    balance: number;
     history: HistoryEntry[];  // Use HistoryEntry type for the history array
     setBudget: (budget: number) => void;
     setExpenses: (expenses: number) => void;
@@ -19,6 +22,7 @@ interface StockStore {
 }
 
 const AddExpense = () => {
+    const budget = useStore((state: StockStore) => state.budget);
     const expenses = useStore((state: StockStore) => state.expenses);
     const setExpenses = useStore((state: StockStore) => state.setExpenses);
     const history = useStore((state: StockStore) => state.history);
@@ -30,14 +34,19 @@ const AddExpense = () => {
         const expense = parseFloat((document.getElementById('expense-input') as HTMLInputElement).value);
         const category = (document.getElementById('category') as HTMLSelectElement).value;
         if (expense <= 0) {
-            alert("Expense should be greater than 0");
+            toast.error("Expense should be greater than 0");
+            return;
+        }
+        if (budget - expenses - expense < 0) {
+            toast.error("Expense exceeds the budget");
+            return;
         }
         setExpenses(expenses + expense);
         setHistory([...history, { label, amount: expense, category }]);
         (document.getElementById('expense-input') as HTMLInputElement).value = '';
         (document.getElementById('label-input') as HTMLInputElement).value = '';
         (document.getElementById('category') as HTMLSelectElement).value = '';
-        alert("Expense added successfully");
+        toast.success("Expense added successfully");
     }
 
     useEffect(() => {
